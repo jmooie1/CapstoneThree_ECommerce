@@ -14,13 +14,11 @@ import java.util.List;
 @RestController
 @RequestMapping("products")
 @CrossOrigin
-public class ProductsController
-{
+public class ProductsController {
     private ProductDao productDao;
 
     @Autowired
-    public ProductsController(ProductDao productDao)
-    {
+    public ProductsController(ProductDao productDao) {
         this.productDao = productDao;
     }
 
@@ -32,8 +30,7 @@ public class ProductsController
                                 @RequestParam(name="color", required = false) String color
                                 )
     {
-        try
-        {
+        try {
             return productDao.search(categoryId, minPrice, maxPrice, color);
         }
         catch(Exception ex)
@@ -44,10 +41,8 @@ public class ProductsController
 
     @GetMapping("{id}")
     @PreAuthorize("permitAll()")
-    public Product getById(@PathVariable int id )
-    {
-        try
-        {
+    public Product getById(@PathVariable int id) {
+        try {
             var product = productDao.getById(id);
 
             if(product == null)
@@ -77,11 +72,10 @@ public class ProductsController
 
     @PutMapping("{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void updateProduct(@PathVariable int id, @RequestBody Product product)
-    {
-        try
-        {
-            productDao.create(product);
+    public void updateProduct(@PathVariable int id, @RequestBody Product product) {
+        try {
+            product.setProductId(id);
+            productDao.update(id,product);
         }
         catch(Exception ex)
         {
@@ -91,10 +85,8 @@ public class ProductsController
 
     @DeleteMapping("{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void deleteProduct(@PathVariable int id)
-    {
-        try
-        {
+    public void deleteProduct(@PathVariable int id) {
+        try {
             var product = productDao.getById(id);
 
             if(product == null)

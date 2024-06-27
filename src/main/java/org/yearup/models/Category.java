@@ -46,4 +46,8 @@ public class Category
     {
         this.description = description;
     }
+
+    public Category save(Category category) {
+        return category;
+    }
 }
