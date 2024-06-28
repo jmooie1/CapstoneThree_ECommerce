@@ -110,8 +110,7 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
             statement.setInt(1, productId);
             ResultSet row = statement.executeQuery();
 
-            if (row.next())
-            {
+            if (row.next()) {
                 return mapRow(row);
             }
         }
@@ -164,8 +163,7 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
     }
 
     @Override
-    public void update(int productId, Product product)
-    {
+    public void update(int productId, Product product) {
         String sql = "UPDATE products" +
                 " SET name = ? " +
                 "   , price = ? " +
@@ -177,10 +175,9 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
                 "   , featured = ? " +
                 " WHERE product_id = ?;";
 
-        System.out.println("Updating product with ID: " + productId);
-
         try (Connection connection = getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
+
             statement.setString(1, product.getName());
             statement.setBigDecimal(2, product.getPrice());
             statement.setInt(3, product.getCategoryId());
@@ -191,18 +188,17 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
             statement.setBoolean(8, product.isFeatured());
             statement.setInt(9, productId);
 
-            int rowsAffected = statement.executeUpdate();
-            System.out.println("Rows that have been affected: " + rowsAffected);
-        }
-        catch (SQLException e)
-        {
+           int rowsUpdated = statement.executeUpdate();
+           if(rowsUpdated == 0) {
+               throw new RuntimeException("Failed to update product with ID: " + productId);
+           }
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void delete(int productId)
-    {
+    public void delete(int productId) {
 
         String sql = "DELETE FROM products " +
                 " WHERE product_id = ?;";
@@ -223,6 +219,21 @@ public class MySqlProductDao extends MySqlDaoBase implements ProductDao
     @Override
     public List<Product> findByCategoryId(int categoryId) {
         return List.of();
+    }
+
+    @Override
+    public Product save(Product product) {
+       if(product.getProductId() == 0) {
+           return create(product);
+       } else {
+           update (product.getProductId(), product);
+           return product;
+       }
+    }
+
+    @Override
+    public Product findByProductId(int id) {
+        return null;
     }
 
     protected static Product mapRow(ResultSet row) throws SQLException

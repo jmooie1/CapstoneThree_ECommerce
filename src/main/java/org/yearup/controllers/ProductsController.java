@@ -2,6 +2,7 @@ package org.yearup.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -58,28 +59,27 @@ public class ProductsController {
 
     @PostMapping()
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public Product addProduct(@RequestBody Product product)
-    {
-        try
-        {
-            return productDao.create(product);
+    public ResponseEntity<Product> addProduct(@RequestBody Product product) {
+        try {
+        Product productCreated = productDao.save(product);
+        return ResponseEntity.status(201).body(productCreated);
         }
         catch(Exception ex)
         {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+            return ResponseEntity.status(500).build();
         }
     }
 
     @PutMapping("{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void updateProduct(@PathVariable int id, @RequestBody Product product) {
+    public ResponseEntity<Product> updateProduct(@PathVariable int id, @RequestBody Product product) {
         try {
             product.setProductId(id);
-            productDao.update(id,product);
-        }
-        catch(Exception ex)
-        {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+
+            productDao.update(id, product);
+                return ResponseEntity.ok(product);
+        } catch (Exception ex) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update product. ");
         }
     }
 

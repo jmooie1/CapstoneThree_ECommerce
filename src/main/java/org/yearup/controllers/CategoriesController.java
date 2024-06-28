@@ -31,19 +31,17 @@ public class CategoriesController {
 
     // add the appropriate annotation for a get action
     @GetMapping
-    public List<Category> getAll()
-    {
+    public List<Category> getAll() {
         // find and return all categories
         return categoryDao.getAllCategories();
     }
 
     // add the appropriate annotation for a get action
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getById(@PathVariable int id)
-    {
+    public ResponseEntity<Category> getById(@PathVariable int id) {
         // get the category by id
         Category category = categoryDao.findById(id);
-        if(category != null) {
+        if (category != null) {
             return ResponseEntity.ok(category);
         } else {
             return ResponseEntity.notFound().build();
@@ -53,8 +51,7 @@ public class CategoriesController {
     // the url to return all products in category 1 would look like this
     // https://localhost:8080/categories/1/products
     @GetMapping("{categoryId}/products")
-    public List<Product> getProductsById(@PathVariable int categoryId)
-    {
+    public List<Product> getProductsById(@PathVariable int categoryId) {
         // get a list of product by categoryId
         return productDao.findByCategoryId(categoryId);
     }
@@ -63,12 +60,15 @@ public class CategoriesController {
     // add annotation to ensure that only an ADMIN can call this function
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Category> addCategory(@RequestBody Category category)
-    {
-        // insert the category
-        Category categoryCreated = categoryDao.save(category);
-        return ResponseEntity.status(201).body(categoryCreated);
+    public ResponseEntity<Category> addCategory(@RequestBody Category category) {
+        try {
+         // insert the category
+         Category categoryCreated = categoryDao.save(category);
+         return ResponseEntity.status(201).body(categoryCreated);
+     } catch(Exception e) {
+            return ResponseEntity.status(500).build();
     }
+}
 
     // add annotation to call this method for a PUT (update) action - the url path must include the categoryId
     // add annotation to ensure that only an ADMIN can call this function
@@ -79,13 +79,12 @@ public class CategoriesController {
         Category categoryThatExists = categoryDao.findById(id);
         if (categoryThatExists != null) {
             category.setCategoryId(id);
-            Category updatedCategory = category.save(category);
-            return ResponseEntity.ok(updatedCategory);
+            categoryDao.update(id,category);
+            return ResponseEntity.ok(category);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
-
 
     // add annotation to call this method for a DELETE action - the url path must include the categoryId
     // add annotation to ensure that only an ADMIN can call this function
@@ -93,8 +92,9 @@ public class CategoriesController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity <Void> deleteCategory(@PathVariable int id) {
 
+        Category existingCategory = categoryDao.findById(id);
         // delete the category by id
-        if(categoryDao.findById(id) != null) {
+        if(existingCategory != null) {
             categoryDao.deleteById(id);
             return ResponseEntity.noContent().build();
         } else {
